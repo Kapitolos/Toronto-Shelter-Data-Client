@@ -1,0 +1,233 @@
+.App {
+  text-align: center;
+ }
+
+ body {
+  background-color: rgb(235, 232, 228);
+ }
+ 
+ h1 {
+  font-family:'Times New Roman', Times, serif;
+ }
+
+ .Navbar {
+  background-color: #333;
+  padding: 10px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.Navbar ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 20px;
+}
+
+.Navbar li {
+  display: inline;
+}
+
+.Navbar a {
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.Navbar a:hover {
+  background-color: #575757;
+}
+
+.Tabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  
+}
+
+.Tabs button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.Tabs button:hover {
+  background-color: #eee;
+}
+
+.Tabs button.active {
+  background-color: #94c6f3;
+  color: #fff;
+  font-weight: bold;
+}
+
+.TabContent {
+  display: flex; /* Enables flexbox for centering */
+  justify-content: center; /* Horizontally centers the graph */
+  align-items: center; /* Vertically centers the graph (optional, remove if not needed) */
+  margin: 0 auto; /* Ensures the container itself is horizontally centered */
+  max-width: 1000px; /* Optional: Set a maximum width for the container */
+  width: 100%; /* Allows the container to scale */
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  box-sizing: border-box; /* Ensures padding doesn’t affect width */
+}
+
+
+.TabContent > div {
+  max-width: 800px; /* Set a maximum width for the chart */
+  width: 100%; /* Allow the chart to scale with the container */
+}
+
+
+
+.Shelter_Dashboard {
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
+  align-items: center; /* Centers child items horizontally */
+  justify-content: flex-start; /* Optional: Align items at the top */
+  padding: 20px;
+}
+
+ .Shelter_Dashboard > div {
+  flex: 1  50%; 
+  min-width: 500px; /* Ensures items don’t get too small */
+  padding: 50px;
+}
+
+ .Dash_Title {
+text-align: center;
+ }
+
+.Occ_Cap {
+  color: rgb(104, 42, 42);
+  max-height: 700px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+
+  }
+
+  .Waitlist {
+    color: rgb(64, 77, 58);
+    max-height: 700px;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+  }
+  
+  .System_Flow {
+    color: rgb(64, 77, 58);
+    max-height: 60%;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+  }
+
+  .Hist_Occ {
+    color: rgb(64, 77, 58);
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+  }
+
+  .Deaths {
+    color: rgb(64, 77, 58);
+    max-height: 600px;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+  }
+
+
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@media (max-width: 768px) {
+  .Navbar ul {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .Navbar {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px 5px;
+  }
+  .Tabs {
+    flex-direction: column;
+    gap: 5px;
+  }
+  .TabContent {
+    padding: 5px;
+    max-width: 100vw;
+    min-width: 0;
+    border: none;
+  }
+  .Shelter_Dashboard > div {
+    min-width: 100vw;
+    padding: 10px;
+  }
+  .App {
+    padding: 0 2vw;
+  }
+  h1, .Dash_Title {
+    font-size: 1.2rem;
+  }
+  .TabContent > div {
+    max-width: 98vw;
+    padding: 0;
+    min-height: 600px; /* Increase height for charts on mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .Navbar ul {
+    gap: 5px;
+  }
+  .Tabs button {
+    font-size: 14px;
+    padding: 8px 10px;
+  }
+  .TabContent > div {
+    max-width: 98vw;
+    padding: 0;
+    min-height: 800px; /* Even more height for very small screens */
+  }
+  .App {
+    padding: 0 1vw;
+  }
+  h1, .Dash_Title {
+    font-size: 1rem;
+  }
+}
+
+
+
+
+

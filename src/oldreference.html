@@ -1,0 +1,43 @@
+      <div>
+            <div>
+            <h1 className="Dash_Title">Shelter & Housing Dashboard</h1>
+            </div>
+            <div className="Shelter_Dashboard">
+            <div className="Occ_Cap">
+            <section>
+                <h2>Shelter Occupancy & Capacity</h2>
+              <ShelterOccupancyChart data={shelterOccupancy}/>
+            </section>
+            </div>
+            
+            <div className="Waitlist">
+            <section>
+                <h2>Centralized Waiting List Activity for Social Housing</h2>
+                <HousingWaitlistChart data={housingWaitlist} />
+            </section>
+            </div>
+            
+            <div className="System_Flow">
+            <section>
+                <h2>Shelter System Flow</h2>
+                <ShelterFlowChart data={shelterFlow} />
+            </section>
+            </div>
+           
+            <div className="Deaths">
+            <section>
+                <h2>Deaths in Shelters</h2>
+                <ShelterDeathsChart data={shelterDeaths} />
+            </section>
+            </div>
+            
+            <div className="Hist_Occ">
+            <section>
+                <h2>Historical Shelter Occupancy</h2>
+                <HistoricalOccupancyChart data={historicalOccupancy} />
+            </section>
+            </div>
+         </div>
+        </div>
+        
+    );
