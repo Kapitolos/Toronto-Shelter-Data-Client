@@ -14,8 +14,12 @@
   background-color: #333;
   padding: 10px;
   display: flex;
-  justify-content: space-around;
+  justify-content: flex-start;
   align-items: center;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
 .Navbar ul {
@@ -151,6 +155,609 @@ text-align: center;
 
   }
 
+  .SectorFilter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .SectorFilter-label {
+    font-weight: bold;
+    font-size: 16px;
+    color: #333;
+  }
+
+  .SectorFilter-select {
+    padding: 8px 16px;
+    font-size: 16px;
+    border: 2px solid #94c6f3;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    min-width: 200px;
+  }
+
+  .SectorFilter-select:hover {
+    border-color: #6ba3d1;
+    box-shadow: 0 2px 4px rgba(148, 198, 243, 0.3);
+  }
+
+  .SectorFilter-select:focus {
+    outline: none;
+    border-color: #94c6f3;
+    box-shadow: 0 0 0 3px rgba(148, 198, 243, 0.2);
+  }
+
+  .SectorFilter-count {
+    font-size: 14px;
+    color: #666;
+    font-style: italic;
+    margin-left: 10px;
+  }
+
+  .SectorFilter-note {
+    color: #999;
+    font-size: 12px;
+  }
+
+  .CoordinateFetch-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin: 20px 0;
+    padding: 15px;
+  }
+
+  .FetchCoordinates-button {
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background-color: #94c6f3;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .FetchCoordinates-button:hover:not(:disabled) {
+    background-color: #6ba3d1;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+  }
+
+  .FetchCoordinates-button:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .FetchCoordinates-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  .FetchCoordinates-message {
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    text-align: center;
+    max-width: 600px;
+  }
+
+  .FetchCoordinates-message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+
+  .FetchCoordinates-message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+
+  .MapFilters {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 15px 0;
+    padding: 12px 16px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .MapFilters-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .MapFilters-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .MapFilters-label {
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+    white-space: nowrap;
+  }
+
+  .MapFilters-select {
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 2px solid #94c6f3;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    min-width: 150px;
+  }
+
+  .MapFilters-select:hover {
+    border-color: #6ba3d1;
+    box-shadow: 0 2px 4px rgba(148, 198, 243, 0.3);
+  }
+
+  .MapFilters-select:focus {
+    outline: none;
+    border-color: #94c6f3;
+    box-shadow: 0 0 0 3px rgba(148, 198, 243, 0.2);
+  }
+
+  .MapFilters-search-group {
+    flex: 1;
+    min-width: 250px;
+    position: relative;
+  }
+
+  .MapFilters-search {
+    flex: 1;
+    padding: 8px 35px 8px 12px;
+    font-size: 14px;
+    border: 2px solid #94c6f3;
+    border-radius: 4px;
+    background-color: white;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .MapFilters-search:hover {
+    border-color: #6ba3d1;
+    box-shadow: 0 2px 4px rgba(148, 198, 243, 0.3);
+  }
+
+  .MapFilters-search:focus {
+    outline: none;
+    border-color: #94c6f3;
+    box-shadow: 0 0 0 3px rgba(148, 198, 243, 0.2);
+  }
+
+  .MapFilters-clear {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #999;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .MapFilters-clear:hover {
+    background-color: #f0f0f0;
+    color: #666;
+  }
+
+  .MapFilters-count {
+    font-size: 14px;
+    color: #666;
+    font-style: italic;
+    text-align: center;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
+  }
+
+  .MapFilters-note {
+    color: #999;
+    font-size: 12px;
+  }
+
+  .MapFilters-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0;
+    padding: 8px 12px;
+    border-bottom: 2px solid #ddd;
+    cursor: pointer;
+  }
+
+  .MapFilters-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    user-select: none;
+  }
+
+  .MapFilters-header-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .MapFilters-toggle {
+    padding: 4px 8px;
+    font-size: 14px;
+    background-color: #94c6f3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    min-width: 30px;
+  }
+
+  .MapFilters-toggle:hover {
+    background-color: #6ba3d1;
+  }
+
+  .MapFilters-content {
+    margin-top: 10px;
+    padding: 0 4px;
+  }
+
+  .MapFilters-reset {
+    padding: 6px 12px;
+    font-size: 12px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .MapFilters-reset:hover {
+    background-color: #e0e0e0;
+  }
+
+  .MapFilters-count-collapsed {
+    font-size: 11px;
+    color: #999;
+    text-align: right;
+    padding-top: 4px;
+    margin-top: 4px;
+    border-top: 1px solid #eee;
+  }
+
+  .MapFilters-coordinate-fetch {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
+  }
+
+  .MapFilters-fetch-button {
+    width: 100%;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    background-color: #6366f1;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .MapFilters-fetch-button:hover:not(:disabled) {
+    background-color: #4f46e5;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+  }
+
+  .MapFilters-fetch-button:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  .MapFilters-fetch-button:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  .MapFilters-fetch-message {
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+
+  .MapFilters-fetch-message.success {
+    background-color: #d1fae5;
+    color: #065f46;
+    border: 1px solid #10b981;
+  }
+
+  .MapFilters-fetch-message.error {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #ef4444;
+  }
+
+  .MapFilters-number {
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 2px solid #94c6f3;
+    border-radius: 4px;
+    background-color: white;
+    width: 100px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .MapFilters-number:hover {
+    border-color: #6ba3d1;
+  }
+
+  .MapFilters-number:focus {
+    outline: none;
+    border-color: #94c6f3;
+    box-shadow: 0 0 0 3px rgba(148, 198, 243, 0.2);
+  }
+
+  .MapLegend {
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+  }
+
+  .MapLegend-container .MapLegend {
+    background-color: white;
+    padding: 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ddd;
+  }
+
+  .MapLegend-title {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .MapLegend-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .MapLegend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+  }
+
+  .MapLegend-marker {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .MapLegend-marker.blue {
+    background-color: #3b82f6;
+  }
+
+  .MapLegend-marker.red {
+    background-color: #ef4444;
+  }
+
+  .MapLegend-marker.small {
+    width: 12px;
+    height: 12px;
+  }
+
+  .MapLegend-marker.large {
+    width: 28px;
+    height: 28px;
+  }
+
+  .MapLegend-size {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .MapStatistics {
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ddd;
+  }
+
+  .MapStatistics-title {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+  }
+
+  .MapStatistics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .MapStatistics-item:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .MapStatistics-item {
+    text-align: center;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+  }
+
+  .MapStatistics-value {
+    font-size: 20px;
+    font-weight: bold;
+    color: #94c6f3;
+    margin-bottom: 4px;
+  }
+
+  .MapStatistics-label {
+    font-size: 12px;
+    color: #666;
+  }
+
+  .MapActions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ExportButton {
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    background-color: #10b981;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .ExportButton:hover:not(:disabled) {
+    background-color: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+  }
+
+  .ExportButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  .MapContainer-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  .MapContainer-inner {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .MapLegend-container {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    z-index: 1000;
+    background-color: white;
+    padding: 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    max-width: 250px;
+  }
+
+  .InteractiveMap-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .MapTitle {
+    margin-bottom: 15px;
+  }
+
+  .MapTitle h1 {
+    font-size: 1.5rem;
+    margin: 0 0 5px 0;
+    color: #333;
+  }
+
+  .MapTitle-date {
+    font-size: 1rem;
+    color: #666;
+    font-weight: normal;
+    margin: 0;
+  }
+
+  .MapLayout-top {
+    margin-bottom: 15px;
+  }
+
+  .MapLayout-filters {
+    min-width: 0;
+  }
+
+  .MapLayout-bottom {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .MapLayout-bottom-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 800px;
+  }
+
+  .MapContainer {
+    height: 600px;
+    width: 100%;
+    max-width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+  }
+
 
 
 .App-header {
@@ -204,6 +811,15 @@ text-align: center;
     padding: 0;
     min-height: 600px; /* Increase height for charts on mobile */
   }
+  .SectorFilter {
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+  }
+  .SectorFilter-select {
+    width: 100%;
+    min-width: unset;
+  }
 }
 
 @media (max-width: 480px) {
@@ -224,6 +840,54 @@ text-align: center;
   }
   h1, .Dash_Title {
     font-size: 1rem;
+  }
+  .SectorFilter-label {
+    font-size: 14px;
+  }
+  .SectorFilter-select {
+    font-size: 14px;
+    padding: 6px 12px;
+  }
+  .MapContainer {
+    height: 500px;
+    width: 100%;
+    max-width: 100vw;
+  }
+  .MapContainer-wrapper {
+    padding: 10px;
+  }
+  .FetchCoordinates-button {
+    font-size: 14px;
+    padding: 10px 16px;
+  }
+  .CoordinateFetch-section {
+    padding: 10px;
+  }
+  .MapFilters {
+    padding: 15px;
+  }
+  .MapFilters-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .MapFilters-group {
+    width: 100%;
+  }
+  .MapFilters-select {
+    width: 100%;
+    min-width: unset;
+  }
+  .MapFilters-search {
+    width: 100%;
+  }
+  .MapLayout-top {
+    grid-template-columns: 1fr;
+  }
+  .MapLayout-bottom-center {
+    max-width: 100%;
+  }
+  .MapStatistics-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 

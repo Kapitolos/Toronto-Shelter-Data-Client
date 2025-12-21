@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import './App.css';
 import ShelterOccupancyChart from "./ShelterOccupancyChart";
 import HousingWaitlistChart from "./HousingWaitlistChart"; // Import the new chart
 import ShelterFlowChart from "./ShelterFlowChart";
 import HistoricalOccupancyChart from "./HistoricalOccupancyChart";
+import SectorFilter from "./SectorFilter";
 
 function ShelterDashboard() {
     // State for each dataset
@@ -13,6 +14,8 @@ function ShelterDashboard() {
     const [historicalOccupancy, setHistoricalOccupancy] = useState([]);
     // set tab
     const [activeTab, setActiveTab] = useState("occupancy");
+    // Sector filter state
+    const [selectedSector, setSelectedSector] = useState("");
 
 
     useEffect(() => {
@@ -47,10 +50,23 @@ function ShelterDashboard() {
             .catch(error => console.error("Error fetching shelter data:", error));
     }, []);
 
+    // Extract unique sectors from shelter occupancy data
+    const availableSectors = useMemo(() => {
+        if (!shelterOccupancy || shelterOccupancy.length === 0) return [];
+        const sectors = [...new Set(shelterOccupancy.map(item => item.SECTOR).filter(Boolean))];
+        return sectors.sort();
+    }, [shelterOccupancy]);
+
+    // Filter shelter occupancy data by selected sector
+    const filteredShelterOccupancy = useMemo(() => {
+        if (!selectedSector) return shelterOccupancy;
+        return shelterOccupancy.filter(item => item.SECTOR === selectedSector);
+    }, [shelterOccupancy, selectedSector]);
+
     const renderContent = () => {
         switch (activeTab) {
             case "occupancy":
-                return   <ShelterOccupancyChart data={shelterOccupancy}/>;
+                return <ShelterOccupancyChart data={filteredShelterOccupancy} />;
             case "waitlist":
                 return <HousingWaitlistChart data={housingWaitlist} />;
             case "flow":
@@ -65,6 +81,15 @@ function ShelterDashboard() {
     return (
         <div>
             <h1 className="Dash_Title">Citywide Data</h1>
+            {activeTab === "occupancy" && (
+                <SectorFilter
+                    sectors={availableSectors}
+                    selectedSector={selectedSector}
+                    onSectorChange={setSelectedSector}
+                    count={filteredShelterOccupancy.length}
+                    totalCount={shelterOccupancy.length}
+                />
+            )}
             <div className="Tabs">
                 <button onClick={() => setActiveTab("occupancy")} className={activeTab === "occupancy" ? "active" : ""}>Occupancy 2025</button>
                 <button onClick={() => setActiveTab("waitlist")} className={activeTab === "waitlist" ? "active" : ""}>Housing Waitlist</button>

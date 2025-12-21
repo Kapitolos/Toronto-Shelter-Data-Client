@@ -568,5 +568,227 @@
         "address": "60 Newcastle St",
         "latitude": 43.6179,
         "longitude": -79.49712
+    },
+    {
+        "name": "213 Carlton Street",
+        "address": "213 Carlton Street",
+        "latitude": 43.6638043,
+        "longitude": -79.3696114
+    },
+    {
+        "name": "Christie Ossington - Spadina Rd",
+        "address": "136 Spadina Rd",
+        "latitude": 43.6731024,
+        "longitude": -79.4066484
+    },
+    {
+        "name": "Kingston Residence SWS",
+        "address": "4674 Kingston Rd",
+        "latitude": 43.7763895,
+        "longitude": -79.1747134
+    },
+    {
+        "name": "DH Warming Centre - 81 Elizabeth",
+        "address": "81 Elizabeth St.",
+        "latitude": 43.6541993,
+        "longitude": -79.3845204
+    },
+    {
+        "name": "Dixon Hall - Warming Centre North York",
+        "address": "12 Holmes Ave",
+        "latitude": 43.7801232,
+        "longitude": -79.4036249
+    },
+    {
+        "name": "Eva's Satellite",
+        "address": "25 Canterbury Pl",
+        "latitude": 43.7728063,
+        "longitude": -79.4147491
+    },
+    {
+        "name": "La Passerelle I.D.E. L'Agapanthe",
+        "address": "179 Gerrard St. East",
+        "latitude": 43.660887,
+        "longitude": -79.373341
+    },
+    {
+        "name": "Matthew House - Dundas House",
+        "address": "981 Dundas St W",
+        "latitude": 43.6502416,
+        "longitude": -79.4152827
+    },
+    {
+        "name": "Matthew House - Eunice House",
+        "address": "30 Eunice Rd",
+        "latitude": 43.7717399,
+        "longitude": -79.3706609
+    },
+    {
+        "name": "SVDP Mary's Home",
+        "address": "70 Gerrard St E",
+        "latitude": 43.6600957,
+        "longitude": -79.3783524
+    },
+    {
+        "name": "SVDP St. Clare's Residence",
+        "address": "3410 Bayview Ave",
+        "latitude": 43.7982514,
+        "longitude": -79.3954227
+    },
+    {
+        "name": "St. Felix Centre 69 Fraser Ave. Respite ",
+        "address": "69 Fraser Ave",
+        "latitude": 43.6373395,
+        "longitude": -79.4240054
+    },
+    {
+        "name": "St. Felix Ctr - Adelaide Shelter",
+        "address": "629 Adelaide St W",
+        "latitude": 43.6428411,
+        "longitude": -79.4148928
+    },
+    {
+        "name": "St. Simon's Clubbe House",
+        "address": "556 Sherbourne St",
+        "latitude": 43.6697144,
+        "longitude": -79.3759409
+    },
+    {
+        "name": "Street Haven",
+        "address": "87 Pembroke St",
+        "latitude": 43.659289,
+        "longitude": -79.3727253
+    },
+    {
+        "name": "Street Haven Downtown Hotel Program",
+        "address": "26 Gerrard St E",
+        "latitude": 43.6595672,
+        "longitude": -79.3810055
+    },
+    {
+        "name": "Sojourn House Hotel Program",
+        "address": "165 Grange Ave",
+        "latitude": 43.6508959,
+        "longitude": -79.4013711
+    },
+    {
+        "name": "Sojourn House Ontario St",
+        "address": "101 Ontario St",
+        "latitude": 43.6545261,
+        "longitude": -79.3668494
+    },
+    {
+        "name": "SA Evangeline Residence",
+        "address": "2808 Dundas St W",
+        "latitude": 43.665538,
+        "longitude": -79.4631271
+    },
+    {
+        "name": "Etobicoke Hotel Site 1",
+        "address": "66 Norfinch Dr",
+        "latitude": 43.7572752,
+        "longitude": -79.5298481
+    },
+    {
+        "name": "SA Gateway",
+        "address": "107 Jarvis St",
+        "latitude": 43.6522087,
+        "longitude": -79.372521
+    },
+    {
+        "name": "SA Scarborough Hotel Program",
+        "address": "50 Estate Dr",
+        "latitude": 43.7830185,
+        "longitude": -79.235536
+    },
+    {
+        "name": "Maxwell Meighen Centre",
+        "address": "135 Sherbourne St",
+        "latitude": 43.6551774,
+        "longitude": -79.3694767
+    },
+    {
+        "name": "SA New Hope Leslieville",
+        "address": "29A Leslie St",
+        "latitude": 43.764454,
+        "longitude": -79.3619995
+    },
+    {
+        "name": "SA Islington Seniors' Shelter",
+        "address": "2671 Islington Ave",
+        "latitude": 43.739153,
+        "longitude": -79.5656502
+    },
+    {
+        "name": "The Scott Mission - Kensington location",
+        "address": "346 Spadina Ave.",
+        "latitude": 43.65425,
+        "longitude": -79.398877
+    },
+    {
+        "name": "Scott Mission",
+        "address": "502 Spadina Ave",
+        "latitude": 43.6586664,
+        "longitude": -79.4007532
+    },
+    {
+        "name": "Romero-Edna Lane House",
+        "address": "2387 Dundas Street West",
+        "latitude": 43.6576297,
+        "longitude": -79.4530551
+    },
+    {
+        "name": "Turning Point Youth Services ",
+        "address": "95 Wellesley St E",
+        "latitude": 43.6658231,
+        "longitude": -79.3792045
+    },
+    {
+        "name": "Scarborough Hotel Program 1",
+        "address": "4584 Kingston Rd",
+        "latitude": 43.6748214,
+        "longitude": -79.3069309
+    },
+    {
+        "name": "Red Door Family Shelter",
+        "address": "189B Booth Ave",
+        "latitude": 43.6587325,
+        "longitude": -79.3429362
+    },
+    {
+        "name": "Vanauley Street YMCA Emergency Shelter",
+        "address": "7 Vanauley St",
+        "latitude": 43.6488641,
+        "longitude": -79.3982301
+    },
+    {
+        "name": "YMCA Sprott House ",
+        "address": "21 Walmer Rd",
+        "latitude": 43.6679008,
+        "longitude": -79.4055445
+    },
+    {
+        "name": "YWCA 1st Stop Woodlawn ",
+        "address": "80 Woodlawn Ave E",
+        "latitude": 43.684742,
+        "longitude": -79.3896662
+    },
+    {
+        "name": "YWCA Davenport Shelter",
+        "address": "348 Davenport Road",
+        "latitude": 43.6754101,
+        "longitude": -79.4013325
+    },
+    {
+        "name": "Youth Without Shelter ",
+        "address": "6 Warrendale Ct",
+        "latitude": 43.7363042,
+        "longitude": -79.5808276
+    },
+    {
+        "name": "YouthLink ",
+        "address": "747 Warden Ave",
+        "latitude": 43.7175246,
+        "longitude": -79.2831322
     }
 ]

@@ -9,6 +9,7 @@ function App() {
         <Router>
             <div className="App">
                 <nav className="Navbar">
+                    <img width="32" height="32" src="https://img.icons8.com/office/40/combo-chart.png" alt="combo-chart" style={{marginRight: '10px'}} />
                     <ul>
                         <li><Link to="/citywide-data">Citywide Data</Link></li>
                         <li><Link to="/interactive-map">Interactive Map</Link></li>
