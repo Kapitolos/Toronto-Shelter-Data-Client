@@ -1,9 +1,31 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
+import { Line } from "react-chartjs-2";
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend
+} from "chart.js";
 import shelterCoordinates from "./updated_shelters.json"; // Import coordinates JSON
 import MapFilters from "./MapFilters";
 import MapLegend from "./MapLegend";
 import MapStatistics from "./MapStatistics";
+
+// Register chart components
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend
+);
 
 // Removed auto-zoom component - map stays centered on downtown Toronto
 
@@ -15,9 +37,12 @@ function InteractiveMap() {
     const [selectedProgram, setSelectedProgram] = useState("");
     const [minCapacity, setMinCapacity] = useState("");
     const [maxCapacity, setMaxCapacity] = useState("");
+    const [minAvailableBeds, setMinAvailableBeds] = useState("");
     const [isFetchingCoordinates, setIsFetchingCoordinates] = useState(false);
     const [fetchMessage, setFetchMessage] = useState(null);
     const [fetchError, setFetchError] = useState(null);
+    const [selectedShelterHistory, setSelectedShelterHistory] = useState(null);
+    const [loadingHistory, setLoadingHistory] = useState(false);
 
     useEffect(() => {
         fetch("http://localhost:3001/api/shelter-dashboard")
@@ -169,6 +194,7 @@ function InteractiveMap() {
         setSelectedProgram("");
         setMinCapacity("");
         setMaxCapacity("");
+        setMinAvailableBeds("");
     };
 
     // Filter shelter occupancy data by all filters
@@ -212,18 +238,32 @@ function InteractiveMap() {
             filtered = filtered.filter(item => (item.CAPACITY_ACTUAL_BED || 0) <= max);
         }
         
-        // Filter by search query
+        // Filter by minimum available beds
+        if (minAvailableBeds !== "") {
+            const minBeds = parseInt(minAvailableBeds);
+            filtered = filtered.filter(item => {
+                const unoccupied = parseNumber(item.UNOCCUPIED_BEDS);
+                return unoccupied >= minBeds;
+            });
+        }
+        
+        // Filter by search query (searches name, address, sector, and program)
         if (searchQuery.trim()) {
             const query = searchQuery.toLowerCase().trim();
             filtered = filtered.filter(item => {
                 const name = (item.LOCATION_NAME || "").toLowerCase();
                 const address = (item.LOCATION_ADDRESS || "").toLowerCase();
-                return name.includes(query) || address.includes(query);
+                const sector = (item.SECTOR || "").toLowerCase();
+                const program = (item.PROGRAM_AREA || "").toLowerCase();
+                return name.includes(query) || 
+                       address.includes(query) || 
+                       sector.includes(query) || 
+                       program.includes(query);
             });
         }
         
         return filtered;
-    }, [shelterOccupancy, selectedSector, selectedProgram, availabilityFilter, minCapacity, maxCapacity, searchQuery]);
+    }, [shelterOccupancy, selectedSector, selectedProgram, availabilityFilter, minCapacity, maxCapacity, minAvailableBeds, searchQuery, parseNumber]);
 
     // Filter shelters to include only those with valid coordinates
     // Memoize this to ensure it updates when filteredShelterOccupancy changes
@@ -257,25 +297,55 @@ function InteractiveMap() {
             });
 
             console.log("📡 Response status:", response.status);
+            
+            // Check if response is JSON before parsing
+            const contentType = response.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                const text = await response.text();
+                console.error("❌ Non-JSON response received:", text.substring(0, 200));
+                throw new Error(`Server returned ${contentType || 'unknown content type'} instead of JSON. The endpoint may not exist or the server may have encountered an error.`);
+            }
+
             const data = await response.json();
             console.log("📦 Response data:", data);
 
+            // Handle rate limiting (429 status)
+            if (response.status === 429) {
+                const retryAfter = data.retry_after || '60';
+                const message = data.message || `Coordinate API rate limit reached. Please try again after ${retryAfter} seconds.`;
+                setFetchError(`⚠️ ${message} (Processed ${data.processed || 0} of ${data.total_requested || 0} shelters)`);
+                console.warn("⚠️ Rate limit reached:", data);
+                return;
+            }
+
             if (!response.ok) {
-                const errorMsg = data.error || data.details || "Failed to fetch coordinates";
+                const errorMsg = data.error || data.details || data.message || "Failed to fetch coordinates";
                 console.error("❌ API Error:", errorMsg);
                 throw new Error(errorMsg);
             }
 
+            // Handle partial success
+            if (data.rate_limited) {
+                const message = data.message || `Rate limit reached. Processed ${data.processed || 0} of ${data.total_requested || 0} shelters.`;
+                setFetchError(`⚠️ ${message} Please try again later.`);
+                console.warn("⚠️ Rate limit reached during processing:", data);
+                return;
+            }
+
             if (data.updated > 0) {
-                setFetchMessage(`✅ Successfully fetched coordinates for ${data.updated} shelters! Reloading page in 2 seconds...`);
+                const message = data.message || `Successfully fetched coordinates for ${data.updated} shelters!`;
+                setFetchMessage(`✅ ${message} Reloading page in 2 seconds...`);
                 console.log(`✅ Fetched ${data.updated} coordinates. Total: ${data.total}, Missing: ${data.missing}`);
                 // Reload the page after 2 seconds to pick up new coordinates
                 setTimeout(() => {
                     console.log("🔄 Reloading page to show new coordinates...");
                     window.location.reload();
                 }, 2000);
+            } else if (data.remaining > 0) {
+                setFetchMessage(`⚠️ ${data.message || `Processed ${data.processed || 0} shelters. ${data.remaining} still need coordinates (batch limit reached).`}`);
+                console.warn("⚠️ Batch limit reached:", data);
             } else if (data.missing > 0) {
-                setFetchMessage(`⚠️ Found ${data.missing} shelters missing coordinates, but couldn't fetch them. Check Flask service logs.`);
+                setFetchMessage(`⚠️ ${data.message || `Found ${data.missing} shelters missing coordinates, but couldn't fetch them.`}`);
                 console.warn("⚠️ Some shelters still missing coordinates:", data);
             } else {
                 setFetchMessage(data.message || "All shelters already have coordinates.");
@@ -289,6 +359,95 @@ function InteractiveMap() {
             setIsFetchingCoordinates(false);
         }
     };
+
+    // Fetch historical data for a shelter
+    const handleViewHistory = async (shelterName) => {
+        if (!shelterName) return;
+        
+        setLoadingHistory(true);
+        setSelectedShelterHistory(null);
+        
+        try {
+            const response = await fetch(`http://localhost:3001/api/shelter-history/${encodeURIComponent(shelterName)}`);
+            const data = await response.json();
+            
+            if (data.history && Object.keys(data.history).length > 0) {
+                setSelectedShelterHistory(data);
+            } else {
+                setSelectedShelterHistory({ 
+                    shelterName: shelterName, 
+                    history: {}, 
+                    message: 'No historical data available for this shelter yet.' 
+                });
+            }
+        } catch (error) {
+            console.error('Error fetching shelter history:', error);
+            setSelectedShelterHistory({ 
+                shelterName: shelterName, 
+                history: {}, 
+                message: 'Failed to load historical data.' 
+            });
+        } finally {
+            setLoadingHistory(false);
+        }
+    };
+
+    // Close history overlay
+    const handleCloseHistory = () => {
+        setSelectedShelterHistory(null);
+    };
+
+    // Prepare chart data for shelter history overlay
+    const getHistoryChartData = () => {
+        if (!selectedShelterHistory || !selectedShelterHistory.history) return null;
+
+        const dates = selectedShelterHistory.dates.sort();
+        const data = dates.map(date => {
+            const shelterData = selectedShelterHistory.history[date][0]; // Get first match
+            return {
+                date,
+                capacity: shelterData?.capacity || 0,
+                occupied: shelterData?.occupied || 0,
+                unoccupied: shelterData?.unoccupied || 0
+            };
+        });
+
+        return {
+            labels: dates,
+            datasets: [
+                {
+                    label: 'Capacity',
+                    data: data.map(d => d.capacity),
+                    borderColor: 'rgba(54, 162, 235, 0.5)', // More transparent
+                    backgroundColor: 'rgba(54, 162, 235, 0.05)', // Very transparent fill
+                    borderDash: [5, 5], // Dashed line
+                    borderWidth: 2,
+                    tension: 0.1,
+                    order: 3 // Render last (behind other lines)
+                },
+                {
+                    label: 'Occupied Beds',
+                    data: data.map(d => d.occupied),
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                    borderWidth: 3, // Thicker line for visibility
+                    tension: 0.1,
+                    order: 1 // Render first (on top)
+                },
+                {
+                    label: 'Available Beds',
+                    data: data.map(d => d.unoccupied),
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.1,
+                    order: 2 // Render second
+                }
+            ]
+        };
+    };
+
+    const historyChartData = getHistoryChartData();
 
     // Export filtered data to CSV
     const handleExportCSV = () => {
@@ -335,8 +494,10 @@ function InteractiveMap() {
                 )}
             </div>
             
-            <div className="MapLayout-top">
-                <div className="MapLayout-filters">
+            {/* Three-column layout: Filters (left), Map (center), Statistics (right) */}
+            <div className="MapLayout-main">
+                {/* Left: Filters */}
+                <div className="MapLayout-sidebar MapLayout-filters">
                     <MapFilters
                         sectors={availableSectors}
                         selectedSector={selectedSector}
@@ -352,6 +513,8 @@ function InteractiveMap() {
                         onMinCapacityChange={setMinCapacity}
                         maxCapacity={maxCapacity}
                         onMaxCapacityChange={setMaxCapacity}
+                        minAvailableBeds={minAvailableBeds}
+                        onMinAvailableBedsChange={setMinAvailableBeds}
                         onResetFilters={handleResetFilters}
                         count={sheltersWithCoordinates.length}
                         totalCount={shelterOccupancy.length}
@@ -361,93 +524,113 @@ function InteractiveMap() {
                         fetchError={fetchError}
                     />
                 </div>
-            </div>
-            
-            <div className="MapContainer-wrapper">
-                <div className="MapContainer-inner">
-                    <MapContainer
-                        center={[43.65107, -79.347015]} // Default Toronto center
-                        zoom={12}
-                        className="MapContainer"
-                    >
-                    <TileLayer
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    />
 
-                {sheltersWithCoordinates.map((shelter, index) => {
-                    // Color Logic: Blue = has available beds (unoccupied > 0), Red = full (unoccupied === 0)
-                    // shelter.unoccupied is already parsed as a number in getShelterWithCoordinates
-                    // Re-parse to ensure consistency with filter logic (handles any edge cases)
-                    const unoccupiedNum = parseNumber(shelter.unoccupied);
-                    // Use strict comparison: > 0 for available (blue), === 0 for full (red)
-                    const color = unoccupiedNum > 0 ? "blue" : "red";
-                    const radius = unoccupiedNum > 0 ? Math.min(Math.max(unoccupiedNum / 15, 10), 30) : 8;
-                    
-                    // Debug: Log mismatches when filter is active (helps identify the issue)
-                    if (availabilityFilter === "available" && unoccupiedNum === 0) {
-                        console.warn(`⚠️ Filter mismatch: Shelter "${shelter.name}" passed "available" filter but has unoccupied=${unoccupiedNum} (should be > 0)`, shelter);
-                    } else if (availabilityFilter === "full" && unoccupiedNum > 0) {
-                        console.warn(`⚠️ Filter mismatch: Shelter "${shelter.name}" passed "full" filter but has unoccupied=${unoccupiedNum} (should be === 0)`, shelter);
-                    }
+                {/* Center: Map */}
+                <div className="MapLayout-center">
+                    <div className="MapContainer-wrapper">
+                        <div className="MapContainer-inner">
+                            <MapContainer
+                                center={[43.65107, -79.347015]} // Default Toronto center
+                                zoom={12}
+                                className="MapContainer"
+                            >
+                            <TileLayer
+                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            />
 
-                    // Use a unique key that includes index to ensure uniqueness (some shelters may have same name/address)
-                    // Include filter state to force re-render when filters change
-                    const shelterKey = `shelter-${index}-${shelter.name}-${shelter.address}-${availabilityFilter}-${unoccupiedNum}`;
+                        {sheltersWithCoordinates.map((shelter, index) => {
+                            // Color Logic: Blue = has available beds (unoccupied > 0), Red = full (unoccupied === 0)
+                            // shelter.unoccupied is already parsed as a number in getShelterWithCoordinates
+                            // Re-parse to ensure consistency with filter logic (handles any edge cases)
+                            const unoccupiedNum = parseNumber(shelter.unoccupied);
+                            // Use strict comparison: > 0 for available (blue), === 0 for full (red)
+                            const color = unoccupiedNum > 0 ? "blue" : "red";
+                            const radius = unoccupiedNum > 0 ? Math.min(Math.max(unoccupiedNum / 15, 10), 30) : 8;
+                            
+                            // Debug: Log mismatches when filter is active (helps identify the issue)
+                            if (availabilityFilter === "available" && unoccupiedNum === 0) {
+                                console.warn(`⚠️ Filter mismatch: Shelter "${shelter.name}" passed "available" filter but has unoccupied=${unoccupiedNum} (should be > 0)`, shelter);
+                            } else if (availabilityFilter === "full" && unoccupiedNum > 0) {
+                                console.warn(`⚠️ Filter mismatch: Shelter "${shelter.name}" passed "full" filter but has unoccupied=${unoccupiedNum} (should be === 0)`, shelter);
+                            }
 
-                    return (
-                        <CircleMarker
-                            key={shelterKey}
-                            center={shelter.coordinates}
-                            radius={radius} // This keeps the visible dot size
-                            fillColor={color}
-                            fillOpacity={0.7}
-                            stroke={false}
-                            eventHandlers={{
-                                mouseover: (e) => e.target.setStyle({ radius: radius * 2, fillOpacity: 1 }), // Expands hover area
-                                mouseout: (e) => e.target.setStyle({ radius: radius, fillOpacity: 0.7 }) // Resets when not hovering
-                                            }}
->
-                            {/* Tooltip for shelter details */}
-                            <Popup>
-                                <div style={{ minWidth: '200px' }}>
-                                    <strong>{shelter.name || "Unknown Shelter"}</strong>
-                                    <br />
-                                    <span>{shelter.address || "Address not available"}</span>
-                                    <br /><br />
-                                    <strong>Capacity:</strong> {shelter.capacity != null ? shelter.capacity : "N/A"}
-                                    <br />
-                                    <strong>Occupied Beds:</strong> {shelter.occupied != null ? shelter.occupied : "N/A"}
-                                    <br />
-                                    <strong>Unoccupied Beds:</strong> {shelter.unoccupied != null ? shelter.unoccupied : "N/A"}
-                                    <br />
-                                    {shelter.program && (
-                                        <>
-                                            <strong>Program:</strong> {shelter.program}
+                            // Use a unique key that includes index to ensure uniqueness (some shelters may have same name/address)
+                            // Include filter state to force re-render when filters change
+                            const shelterKey = `shelter-${index}-${shelter.name}-${shelter.address}-${availabilityFilter}-${unoccupiedNum}`;
+
+                            return (
+                                <CircleMarker
+                                    key={shelterKey}
+                                    center={shelter.coordinates}
+                                    radius={radius} // This keeps the visible dot size
+                                    fillColor={color}
+                                    fillOpacity={0.7}
+                                    stroke={false}
+                                    eventHandlers={{
+                                        mouseover: (e) => e.target.setStyle({ radius: radius * 2, fillOpacity: 1 }), // Expands hover area
+                                        mouseout: (e) => e.target.setStyle({ radius: radius, fillOpacity: 0.7 }) // Resets when not hovering
+                                                    }}
+                >
+                                    {/* Tooltip for shelter details */}
+                                    <Popup>
+                                        <div style={{ minWidth: '200px' }}>
+                                            <strong>{shelter.name || "Unknown Shelter"}</strong>
                                             <br />
-                                        </>
-                                    )}
-                                    {shelter.sector && (
-                                        <>
-                                            <strong>Sector:</strong> {shelter.sector}
-                                        </>
-                                    )}
-                                </div>
-                            </Popup>
-                        </CircleMarker>
-                    );
-                })}
-                    </MapContainer>
-                    {/* Legend inside map container at the bottom */}
-                    <div className="MapLegend-container">
-                        <MapLegend />
+                                            <span>{shelter.address || "Address not available"}</span>
+                                            <br /><br />
+                                            <strong>Capacity:</strong> {shelter.capacity != null ? shelter.capacity : "N/A"}
+                                            <br />
+                                            <strong>Occupied Beds:</strong> {shelter.occupied != null ? shelter.occupied : "N/A"}
+                                            <br />
+                                            <strong>Unoccupied Beds:</strong> {shelter.unoccupied != null ? shelter.unoccupied : "N/A"}
+                                            <br />
+                                            {shelter.program && (
+                                                <>
+                                                    <strong>Program:</strong> {shelter.program}
+                                                    <br />
+                                                </>
+                                            )}
+                                            {shelter.sector && (
+                                                <>
+                                                    <strong>Sector:</strong> {shelter.sector}
+                                                    <br />
+                                                </>
+                                            )}
+                                            <br />
+                                            <button
+                                                className="ShelterHistory-popup-button"
+                                                onClick={() => handleViewHistory(shelter.name)}
+                                                style={{
+                                                    marginTop: '8px',
+                                                    padding: '6px 12px',
+                                                    backgroundColor: '#94c6f3',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '4px',
+                                                    cursor: 'pointer',
+                                                    fontSize: '12px',
+                                                    fontWeight: 'bold'
+                                                }}
+                                            >
+                                                📊 View History
+                                            </button>
+                                        </div>
+                                    </Popup>
+                                </CircleMarker>
+                            );
+                        })}
+                            </MapContainer>
+                            {/* Legend inside map container at the bottom */}
+                            <div className="MapLegend-container">
+                                <MapLegend />
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Statistics and Export below the map */}
-            <div className="MapLayout-bottom">
-                <div className="MapLayout-bottom-center">
+                {/* Right: Statistics */}
+                <div className="MapLayout-sidebar MapLayout-stats">
                     <MapStatistics shelters={sheltersWithCoordinates} />
                     <div className="MapActions">
                         <button 
@@ -460,6 +643,85 @@ function InteractiveMap() {
                     </div>
                 </div>
             </div>
+
+            {/* Historical Data Overlay */}
+            {selectedShelterHistory && (
+                <div className="ShelterHistory-overlay" onClick={handleCloseHistory}>
+                    <div className="ShelterHistory-card" onClick={(e) => e.stopPropagation()}>
+                        <div className="ShelterHistory-card-header">
+                            <h2>{selectedShelterHistory.shelterName} - Historical Data</h2>
+                            <button 
+                                className="ShelterHistory-close-button"
+                                onClick={handleCloseHistory}
+                            >
+                                ×
+                            </button>
+                        </div>
+                        <div className="ShelterHistory-card-content">
+                            {loadingHistory ? (
+                                <div className="ShelterHistory-loading">Loading historical data...</div>
+                            ) : selectedShelterHistory.message ? (
+                                <div className="ShelterHistory-empty-message">
+                                    {selectedShelterHistory.message}
+                                </div>
+                            ) : selectedShelterHistory.history && Object.keys(selectedShelterHistory.history).length > 0 && historyChartData ? (
+                                <div className="ShelterHistory-overlay-content">
+                                    <div className="ShelterHistory-overlay-chart">
+                                        <Line
+                                            data={historyChartData}
+                                            options={{
+                                                responsive: true,
+                                                maintainAspectRatio: true,
+                                                plugins: {
+                                                    title: {
+                                                        display: true,
+                                                        text: 'Shelter Capacity and Occupancy Over Time',
+                                                        font: {
+                                                            size: 16
+                                                        }
+                                                    },
+                                                    legend: {
+                                                        display: true,
+                                                        position: 'top'
+                                                    },
+                                                    tooltip: {
+                                                        mode: 'index',
+                                                        intersect: false
+                                                    }
+                                                },
+                                                scales: {
+                                                    y: {
+                                                        beginAtZero: true,
+                                                        title: {
+                                                            display: true,
+                                                            text: 'Number of Beds'
+                                                        }
+                                                    },
+                                                    x: {
+                                                        title: {
+                                                            display: true,
+                                                            text: 'Date'
+                                                        }
+                                                    }
+                                                },
+                                                interaction: {
+                                                    mode: 'nearest',
+                                                    axis: 'x',
+                                                    intersect: false
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="ShelterHistory-empty-message">
+                                    No historical data available for this shelter yet.
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

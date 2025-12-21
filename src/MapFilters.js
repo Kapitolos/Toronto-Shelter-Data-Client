@@ -16,6 +16,8 @@ function MapFilters({
     onMinCapacityChange,
     maxCapacity,
     onMaxCapacityChange,
+    minAvailableBeds,
+    onMinAvailableBedsChange,
     onResetFilters,
     count,
     totalCount,
@@ -24,7 +26,7 @@ function MapFilters({
     fetchMessage,
     fetchError
 }) {
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(true);
 
     return (
         <div className="MapFilters">
@@ -53,10 +55,10 @@ function MapFilters({
             {isExpanded && (
                 <div className="MapFilters-content">
 
-            <div className="MapFilters-row">
-                {/* Sector Filter */}
-                {sectors && sectors.length > 0 && (
-                    <div className="MapFilters-group">
+            {/* Sector Filter - Own Row */}
+            {sectors && sectors.length > 0 && (
+                <div className="MapFilters-row">
+                    <div className="MapFilters-group MapFilters-group-full">
                         <label htmlFor="sector-select" className="MapFilters-label">
                             Sector:
                         </label>
@@ -74,11 +76,13 @@ function MapFilters({
                             ))}
                         </select>
                     </div>
-                )}
+                </div>
+            )}
 
-                {/* Program Area Filter */}
-                {programAreas && programAreas.length > 0 && (
-                    <div className="MapFilters-group">
+            {/* Program Area Filter - Own Row */}
+            {programAreas && programAreas.length > 0 && (
+                <div className="MapFilters-row">
+                    <div className="MapFilters-group MapFilters-group-full">
                         <label htmlFor="program-select" className="MapFilters-label">
                             Program:
                         </label>
@@ -96,10 +100,12 @@ function MapFilters({
                             ))}
                         </select>
                     </div>
-                )}
+                </div>
+            )}
 
-                {/* Availability Filter */}
-                <div className="MapFilters-group">
+            {/* Availability Filter - Own Row */}
+            <div className="MapFilters-row">
+                <div className="MapFilters-group MapFilters-group-full">
                     <label htmlFor="availability-select" className="MapFilters-label">
                         Availability:
                     </label>
@@ -116,9 +122,9 @@ function MapFilters({
                 </div>
             </div>
 
+            {/* Min Capacity - Own Row */}
             <div className="MapFilters-row">
-                {/* Capacity Range */}
-                <div className="MapFilters-group">
+                <div className="MapFilters-group MapFilters-group-full">
                     <label htmlFor="min-capacity" className="MapFilters-label">
                         Min Capacity:
                     </label>
@@ -132,7 +138,11 @@ function MapFilters({
                         className="MapFilters-number"
                     />
                 </div>
-                <div className="MapFilters-group">
+            </div>
+
+            {/* Max Capacity - Own Row */}
+            <div className="MapFilters-row">
+                <div className="MapFilters-group MapFilters-group-full">
                     <label htmlFor="max-capacity" className="MapFilters-label">
                         Max Capacity:
                     </label>
@@ -148,16 +158,34 @@ function MapFilters({
                 </div>
             </div>
 
-            {/* Search Bar */}
+            {/* Min Available Beds - Own Row */}
             <div className="MapFilters-row">
-                <div className="MapFilters-group MapFilters-search-group">
+                <div className="MapFilters-group MapFilters-group-full">
+                    <label htmlFor="min-available-beds" className="MapFilters-label">
+                        Min Available Beds:
+                    </label>
+                    <input
+                        id="min-available-beds"
+                        type="number"
+                        min="0"
+                        placeholder="Any"
+                        value={minAvailableBeds || ''}
+                        onChange={(e) => onMinAvailableBedsChange(e.target.value ? parseInt(e.target.value) : '')}
+                        className="MapFilters-number"
+                    />
+                </div>
+            </div>
+
+            {/* Search Bar - Own Row */}
+            <div className="MapFilters-row">
+                <div className="MapFilters-group MapFilters-search-group MapFilters-group-full">
                     <label htmlFor="search-input" className="MapFilters-label">
                         Search:
                     </label>
                     <input
                         id="search-input"
                         type="text"
-                        placeholder="Search by shelter name or address..."
+                        placeholder="Search name, sector, or program"
                         value={searchQuery}
                         onChange={(e) => onSearchChange(e.target.value)}
                         className="MapFilters-search"
@@ -174,47 +202,9 @@ function MapFilters({
                 </div>
             </div>
 
-                {/* Count Display */}
-                {count !== undefined && totalCount !== undefined && (
-                    <div className="MapFilters-count">
-                        Showing {count} of {totalCount} shelters
-                        {count < totalCount && (
-                            <span className="MapFilters-note"> ({totalCount - count} hidden by filters)</span>
-                        )}
-                    </div>
-                )}
-
-                {/* Coordinate Fetch Button */}
-                {onFetchCoordinates && (
-                    <div className="MapFilters-coordinate-fetch">
-                        <button 
-                            className="MapFilters-fetch-button"
-                            onClick={onFetchCoordinates}
-                            disabled={isFetchingCoordinates}
-                        >
-                            {isFetchingCoordinates ? "🔄 Fetching Coordinates..." : "📍 Fetch Missing Coordinates"}
-                        </button>
-                        {fetchMessage && (
-                            <div className="MapFilters-fetch-message success">
-                                {fetchMessage}
-                            </div>
-                        )}
-                        {fetchError && (
-                            <div className="MapFilters-fetch-message error">
-                                ❌ {fetchError}
-                            </div>
-                        )}
-                    </div>
-                )}
                 </div>
             )}
             
-            {/* Show minimal count when collapsed - just a small indicator */}
-            {!isExpanded && count !== undefined && totalCount !== undefined && count < totalCount && (
-                <div className="MapFilters-count-collapsed">
-                    {count}/{totalCount}
-                </div>
-            )}
         </div>
     );
 }
