@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
+import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
 import { Line } from "react-chartjs-2";
 import {
     Chart as ChartJS,
@@ -79,7 +79,7 @@ function InteractiveMap() {
     }, []);
 
     // Function to match shelters with coordinates
-    const getShelterWithCoordinates = (shelter) => {
+    const getShelterWithCoordinates = useCallback((shelter) => {
         // Skip shelters without names
         if (!shelter.LOCATION_NAME) {
             return null;
@@ -171,7 +171,7 @@ function InteractiveMap() {
             }
             return null;
         }
-    };
+    }, [parseNumber]);
 
     // Extract unique sectors from shelter occupancy data
     const availableSectors = useMemo(() => {
@@ -267,14 +267,11 @@ function InteractiveMap() {
     }, [shelterOccupancy, selectedSector, selectedProgram, availabilityFilter, minCapacity, maxCapacity, minAvailableBeds, searchQuery, parseNumber]);
 
     // Filter shelters to include only those with valid coordinates
-    // Memoize this to ensure it updates when filteredShelterOccupancy changes
-    // Note: getShelterWithCoordinates is defined in the component but doesn't depend on state,
-    // so we don't need to include it in dependencies
     const sheltersWithCoordinates = useMemo(() => {
         return filteredShelterOccupancy
             .map(getShelterWithCoordinates)
             .filter((shelter) => shelter !== null);
-    }, [filteredShelterOccupancy, parseNumber]);
+    }, [filteredShelterOccupancy, getShelterWithCoordinates]);
 
 
         const mostRecentDate = shelterOccupancy.reduce((latest, item) => {
