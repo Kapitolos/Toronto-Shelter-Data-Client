@@ -5,6 +5,7 @@ import HousingWaitlistChart from "./HousingWaitlistChart"; // Import the new cha
 import ShelterFlowChart from "./ShelterFlowChart";
 import HistoricalOccupancyChart from "./HistoricalOccupancyChart";
 import SectorFilter from "./SectorFilter";
+import { API_BASE } from "./config";
 
 function ShelterDashboard() {
     // State for each dataset
@@ -19,7 +20,7 @@ function ShelterDashboard() {
 
 
     useEffect(() => {
-        fetch("http://localhost:3001/api/shelter-dashboard")
+        fetch(`${API_BASE}/api/shelter-dashboard`)
             .then(response => response.json())
             .then(data => {
                 console.log("Full API Response:", data); // ✅ Log the full response

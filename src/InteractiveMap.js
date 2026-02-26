@@ -15,6 +15,7 @@ import shelterCoordinates from "./updated_shelters.json"; // Import coordinates 
 import MapFilters from "./MapFilters";
 import MapLegend from "./MapLegend";
 import MapStatistics from "./MapStatistics";
+import { API_BASE } from "./config";
 
 // Register chart components
 ChartJS.register(
@@ -45,7 +46,7 @@ function InteractiveMap() {
     const [loadingHistory, setLoadingHistory] = useState(false);
 
     useEffect(() => {
-        fetch("http://localhost:3001/api/shelter-dashboard")
+        fetch(`${API_BASE}/api/shelter-dashboard`)
             .then(response => response.json())
             .then(data => {
                 if (!data.data || !Array.isArray(data.data)) {
@@ -289,7 +290,7 @@ function InteractiveMap() {
 
         try {
             console.log("🔄 Starting coordinate fetch...");
-            const response = await fetch("http://localhost:3001/api/fetch-missing-coordinates", {
+            const response = await fetch(`${API_BASE}/api/fetch-missing-coordinates`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -368,7 +369,7 @@ function InteractiveMap() {
         setSelectedShelterHistory(null);
         
         try {
-            const response = await fetch(`http://localhost:3001/api/shelter-history/${encodeURIComponent(shelterName)}`);
+            const response = await fetch(`${API_BASE}/api/shelter-history/${encodeURIComponent(shelterName)}`);
             const data = await response.json();
             
             if (data.history && Object.keys(data.history).length > 0) {

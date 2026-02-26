@@ -6,7 +6,7 @@ import './App.css';
 
 function App() {
     return (
-        <Router>
+        <Router basename={process.env.PUBLIC_URL || ''}>
             <div className="App">
                 <nav className="Navbar">
                     <img width="32" height="32" src="https://img.icons8.com/office/40/combo-chart.png" alt="combo-chart" style={{marginRight: '10px'}} />

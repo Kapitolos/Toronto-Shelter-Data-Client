@@ -12,6 +12,7 @@ import {
     Legend
 } from 'chart.js';
 import './App.css';
+import { API_BASE } from './config';
 
 ChartJS.register(
     CategoryScale,
@@ -39,7 +40,7 @@ function ShelterHistory() {
 
     // Fetch available dates
     useEffect(() => {
-        fetch('http://localhost:3001/api/historical-dates')
+        fetch(`${API_BASE}/api/historical-dates`)
             .then(res => res.json())
             .then(data => {
                 setAvailableDates(data.dates || []);
@@ -58,7 +59,7 @@ function ShelterHistory() {
 
     // Fetch shelters list from current data
     useEffect(() => {
-        fetch('http://localhost:3001/api/shelter-dashboard')
+        fetch(`${API_BASE}/api/shelter-dashboard`)
             .then(res => res.json())
             .then(data => {
                 if (data.data && data.data[0]) {
@@ -82,7 +83,7 @@ function ShelterHistory() {
 
         setLoading(true);
         setError(null);
-        fetch(`http://localhost:3001/api/shelter-history/${encodeURIComponent(selectedShelter)}`)
+        fetch(`${API_BASE}/api/shelter-history/${encodeURIComponent(selectedShelter)}`)
             .then(res => res.json())
             .then(data => {
                 setShelterHistory(data);
@@ -102,7 +103,7 @@ function ShelterHistory() {
         setError(null);
         
         try {
-            const response = await fetch('http://localhost:3001/api/backfill-historical-data', {
+            const response = await fetch(`${API_BASE}/api/backfill-historical-data`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -115,7 +116,7 @@ function ShelterHistory() {
                 setBackfillMessage(data.message || 'Backfill started successfully. Check server logs for progress.');
                 // Refresh available dates after a delay
                 setTimeout(() => {
-                    fetch('http://localhost:3001/api/historical-dates')
+                    fetch(`${API_BASE}/api/historical-dates`)
                         .then(res => res.json())
                         .then(data => {
                             setAvailableDates(data.dates || []);
@@ -142,7 +143,7 @@ function ShelterHistory() {
 
         setLoading(true);
         setError(null);
-        fetch(`http://localhost:3001/api/compare-dates?date1=${date1}&date2=${date2}`)
+        fetch(`${API_BASE}/api/compare-dates?date1=${date1}&date2=${date2}`)
             .then(res => res.json())
             .then(data => {
                 setComparison(data);
