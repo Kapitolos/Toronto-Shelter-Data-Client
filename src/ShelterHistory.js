@@ -14,6 +14,16 @@ import {
 import './App.css';
 import { API_BASE } from './config';
 
+// Parse JSON only when server returns JSON (avoids "Unexpected token '<'" when server returns HTML 404/waking page)
+async function apiJson(res) {
+    const contentType = res.headers.get('content-type') || '';
+    if (!res.ok || !contentType.includes('application/json')) {
+        const text = await res.text();
+        throw new Error(text.startsWith('<') ? 'Server unavailable or starting (try again in 30–60s)' : text || `Request failed ${res.status}`);
+    }
+    return res.json();
+}
+
 ChartJS.register(
     CategoryScale,
     LinearScale,
@@ -41,7 +51,7 @@ function ShelterHistory() {
     // Fetch available dates
     useEffect(() => {
         fetch(`${API_BASE}/api/historical-dates`)
-            .then(res => res.json())
+            .then(res => apiJson(res))
             .then(data => {
                 setAvailableDates(data.dates || []);
                 if (data.dates && data.dates.length > 0) {
@@ -53,14 +63,14 @@ function ShelterHistory() {
             })
             .catch(err => {
                 console.error('Error fetching dates:', err);
-                setError('Failed to load historical dates');
+                setError(err.message || 'Failed to load historical dates');
             });
     }, []);
 
     // Fetch shelters list from current data
     useEffect(() => {
         fetch(`${API_BASE}/api/shelter-dashboard`)
-            .then(res => res.json())
+            .then(res => apiJson(res))
             .then(data => {
                 if (data.data && data.data[0]) {
                     const shelterNames = [...new Set(
@@ -84,14 +94,14 @@ function ShelterHistory() {
         setLoading(true);
         setError(null);
         fetch(`${API_BASE}/api/shelter-history/${encodeURIComponent(selectedShelter)}`)
-            .then(res => res.json())
+            .then(res => apiJson(res))
             .then(data => {
                 setShelterHistory(data);
                 setLoading(false);
             })
             .catch(err => {
                 console.error('Error fetching history:', err);
-                setError('Failed to load shelter history');
+                setError(err.message || 'Failed to load shelter history');
                 setLoading(false);
             });
     };
@@ -109,26 +119,17 @@ function ShelterHistory() {
                     'Content-Type': 'application/json'
                 }
             });
-            
-            const data = await response.json();
-            
-            if (response.ok) {
-                setBackfillMessage(data.message || 'Backfill started successfully. Check server logs for progress.');
-                // Refresh available dates after a delay
-                setTimeout(() => {
-                    fetch(`${API_BASE}/api/historical-dates`)
-                        .then(res => res.json())
-                        .then(data => {
-                            setAvailableDates(data.dates || []);
-                        })
-                        .catch(err => console.error('Error refreshing dates:', err));
-                }, 5000);
-            } else {
-                setError(data.error || 'Failed to start backfill');
-            }
+            const data = await apiJson(response);
+            setBackfillMessage(data.message || 'Backfill started successfully. Check server logs for progress.');
+            setTimeout(() => {
+                fetch(`${API_BASE}/api/historical-dates`)
+                    .then(res => apiJson(res))
+                    .then(data => setAvailableDates(data.dates || []))
+                    .catch(err => console.error('Error refreshing dates:', err));
+            }, 5000);
         } catch (error) {
             console.error('Error starting backfill:', error);
-            setError('Failed to start backfill. Make sure the server is running.');
+            setError(error.message || 'Failed to start backfill. Server may be starting—try again in 30–60s.');
         } finally {
             setBackfilling(false);
         }
@@ -144,14 +145,14 @@ function ShelterHistory() {
         setLoading(true);
         setError(null);
         fetch(`${API_BASE}/api/compare-dates?date1=${date1}&date2=${date2}`)
-            .then(res => res.json())
+            .then(res => apiJson(res))
             .then(data => {
                 setComparison(data);
                 setLoading(false);
             })
             .catch(err => {
                 console.error('Error comparing dates:', err);
-                setError('Failed to compare dates');
+                setError(err.message || 'Failed to compare dates');
                 setLoading(false);
             });
     };
