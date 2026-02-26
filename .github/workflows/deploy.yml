@@ -29,6 +29,10 @@ jobs:
           npm ci
           npm run build
 
+      # GitHub Pages: serve app for client-side routes (e.g. /shelter-history) so they don't 404
+      - name: Add 404.html for SPA routing
+        run: cp build/index.html build/404.html
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
