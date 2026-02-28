@@ -2,9 +2,16 @@
   text-align: center;
  }
 
- body {
+ html {
+  box-sizing: border-box;
+}
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+body {
   background-color: rgb(235, 232, 228);
- }
+  max-width: 100%;
+}
  
  h1 {
   font-family:'Times New Roman', Times, serif;
@@ -813,6 +820,16 @@ text-align: center;
 }
 
 @media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+  .App {
+    padding: 0 2vw;
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
   .Navbar ul {
     flex-direction: column;
     gap: 10px;
@@ -829,24 +846,25 @@ text-align: center;
   }
   .TabContent {
     padding: 5px;
-    max-width: 100vw;
+    max-width: 100%;
     min-width: 0;
     border: none;
+    box-sizing: border-box;
   }
   .Shelter_Dashboard > div {
-    min-width: 100vw;
+    min-width: 0;
+    max-width: 100%;
     padding: 10px;
-  }
-  .App {
-    padding: 0 2vw;
+    box-sizing: border-box;
   }
   h1, .Dash_Title {
     font-size: 1.2rem;
   }
   .TabContent > div {
-    max-width: 98vw;
+    max-width: 100%;
     padding: 0;
-    min-height: 600px; /* Increase height for charts on mobile */
+    min-height: 600px;
+    box-sizing: border-box;
   }
   .SectorFilter {
     flex-direction: column;
@@ -856,6 +874,30 @@ text-align: center;
   .SectorFilter-select {
     width: 100%;
     min-width: unset;
+  }
+  /* Stack map layout on tablet/mobile */
+  .MapLayout-main {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    max-width: 100%;
+    min-width: 0;
+  }
+  .MapLayout-sidebar { order: 1; }
+  .MapLayout-center { order: 2; min-width: 0; }
+  .MapLayout-stats { order: 3; }
+  .InteractiveMap-container {
+    max-width: 100%;
+    min-width: 0;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  .MapContainer-wrapper,
+  .MapContainer-inner {
+    max-width: 100%;
+    min-width: 0;
+  }
+  .MapContainer {
+    max-width: 100%;
   }
 }
 
@@ -868,12 +910,14 @@ text-align: center;
     padding: 8px 10px;
   }
   .TabContent > div {
-    max-width: 98vw;
+    max-width: 100%;
     padding: 0;
-    min-height: 800px; /* Even more height for very small screens */
+    min-height: 800px;
+    box-sizing: border-box;
   }
   .App {
     padding: 0 1vw;
+    max-width: 100%;
   }
   h1, .Dash_Title {
     font-size: 1rem;
@@ -888,10 +932,11 @@ text-align: center;
   .MapContainer {
     height: 500px;
     width: 100%;
-    max-width: 100vw;
+    max-width: 100%;
   }
   .MapContainer-wrapper {
     padding: 10px;
+    max-width: 100%;
   }
   .FetchCoordinates-button {
     font-size: 14px;
@@ -916,23 +961,6 @@ text-align: center;
   }
   .MapFilters-search {
     width: 100%;
-  }
-  /* Mobile: Stack vertically */
-  .MapLayout-main {
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
-
-  .MapLayout-sidebar {
-    order: 1;
-  }
-
-  .MapLayout-center {
-    order: 2;
-  }
-
-  .MapLayout-stats {
-    order: 3;
   }
   .MapStatistics-grid {
     grid-template-columns: repeat(3, 1fr);

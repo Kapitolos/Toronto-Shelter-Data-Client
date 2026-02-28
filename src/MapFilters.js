@@ -26,7 +26,9 @@ function MapFilters({
     fetchMessage,
     fetchError
 }) {
-    const [isExpanded, setIsExpanded] = useState(true);
+    const [isExpanded, setIsExpanded] = useState(() =>
+        typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches ? false : true
+    );
 
     return (
         <div className="MapFilters">
