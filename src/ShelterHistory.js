@@ -276,26 +276,29 @@ function ShelterHistory() {
                 {shelterHistory && historyChartData && (
                     <div className="ShelterHistory-chart">
                         <h3>{shelterHistory.shelterName} - Historical Trends</h3>
-                        <Line
-                            data={historyChartData}
-                            options={{
-                                responsive: true,
-                                plugins: {
-                                    title: {
-                                        display: true,
-                                        text: 'Shelter Capacity and Occupancy Over Time'
+                        <div className="ShelterHistory-chart-canvas">
+                            <Line
+                                data={historyChartData}
+                                options={{
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        title: {
+                                            display: true,
+                                            text: 'Shelter Capacity and Occupancy Over Time'
+                                        },
+                                        legend: {
+                                            display: true
+                                        }
                                     },
-                                    legend: {
-                                        display: true
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true
+                                        }
                                     }
-                                },
-                                scales: {
-                                    y: {
-                                        beginAtZero: true
-                                    }
-                                }
-                            }}
-                        />
+                                }}
+                            />
+                        </div>
                         <div className="ShelterHistory-table">
                             <table>
                                 <thead>
@@ -334,7 +337,11 @@ function ShelterHistory() {
 
             {/* Date Comparison Section */}
             <div className="ShelterHistory-section">
-                <h2>Compare Dates</h2>
+                <h2>Compare Dates (All Shelters)</h2>
+                <p className="ShelterHistory-note">
+                    This comparison aggregates all shelters in the selected range.
+                    Use "View Shelter History" above for one shelter only.
+                </p>
                 <div className="ShelterHistory-controls">
                     <select
                         value={date1}
@@ -361,7 +368,7 @@ function ShelterHistory() {
                         disabled={!date1 || !date2 || loading}
                         className="ShelterHistory-button"
                     >
-                        {loading ? 'Loading...' : 'Compare'}
+                        {loading ? 'Loading...' : 'Compare All Shelters'}
                     </button>
                 </div>
 
