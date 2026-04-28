@@ -181,7 +181,10 @@ function ShelterHistory() {
         return filteredDates.map((date) => {
             const entries = shelterHistory.history[date] || [];
             const exactEntry = entries.find((entry) => (entry.name || '').trim().toLowerCase() === shelterName);
-            const shelterData = exactEntry || entries[0] || {};
+            const shelterData = exactEntry;
+            if (!shelterData) {
+                return null;
+            }
 
             return {
                 date,
@@ -189,7 +192,7 @@ function ShelterHistory() {
                 occupied: shelterData?.occupied || 0,
                 unoccupied: shelterData?.unoccupied || 0
             };
-        });
+        }).filter(Boolean);
     };
 
     // Prepare chart data for shelter history
