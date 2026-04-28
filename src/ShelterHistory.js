@@ -165,13 +165,24 @@ function ShelterHistory() {
             });
     };
 
-    // Prepare chart data for shelter history
-    const getHistoryChartData = () => {
-        if (!shelterHistory || !shelterHistory.history) return null;
+    // Keep only exact shelter matches and only rows inside selected date range
+    const getFilteredShelterRows = () => {
+        if (!shelterHistory || !shelterHistory.history) return [];
 
-        const dates = shelterHistory.dates.sort();
-        const data = dates.map(date => {
-            const shelterData = shelterHistory.history[date][0]; // Get first match
+        const shelterName = (selectedShelter || '').trim().toLowerCase();
+        const start = date1 || '0000-00-00';
+        const end = date2 || '9999-12-31';
+
+        const filteredDates = (shelterHistory.dates || [])
+            .slice()
+            .sort()
+            .filter((date) => date >= start && date <= end);
+
+        return filteredDates.map((date) => {
+            const entries = shelterHistory.history[date] || [];
+            const exactEntry = entries.find((entry) => (entry.name || '').trim().toLowerCase() === shelterName);
+            const shelterData = exactEntry || entries[0] || {};
+
             return {
                 date,
                 capacity: shelterData?.capacity || 0,
@@ -179,6 +190,13 @@ function ShelterHistory() {
                 unoccupied: shelterData?.unoccupied || 0
             };
         });
+    };
+
+    // Prepare chart data for shelter history
+    const getHistoryChartData = () => {
+        const data = getFilteredShelterRows();
+        if (data.length === 0) return null;
+        const dates = data.map((d) => d.date);
 
         return {
             labels: dates,
@@ -216,6 +234,7 @@ function ShelterHistory() {
     };
 
     const historyChartData = getHistoryChartData();
+    const filteredShelterRows = getFilteredShelterRows();
     const endDateOptions = date1 ? availableDates.filter((date) => date >= date1) : availableDates;
 
     return (
@@ -286,17 +305,16 @@ function ShelterHistory() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {shelterHistory.dates.sort().map(date => {
-                                        const shelterData = shelterHistory.history[date][0];
-                                        const capacity = shelterData?.capacity || 0;
-                                        const occupied = shelterData?.occupied || 0;
-                                        const unoccupied = shelterData?.unoccupied || 0;
+                                    {filteredShelterRows.map((row) => {
+                                        const capacity = row.capacity;
+                                        const occupied = row.occupied;
+                                        const unoccupied = row.unoccupied;
                                         const occupancyRate = capacity > 0 
                                             ? ((occupied / capacity) * 100).toFixed(1) 
                                             : '0.0';
                                         return (
-                                            <tr key={date}>
-                                                <td>{date}</td>
+                                            <tr key={row.date}>
+                                                <td>{row.date}</td>
                                                 <td>{capacity}</td>
                                                 <td>{occupied}</td>
                                                 <td>{unoccupied}</td>
