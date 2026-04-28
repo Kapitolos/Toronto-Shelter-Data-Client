@@ -45,26 +45,52 @@ function ShelterHistory() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [shelters, setShelters] = useState([]);
-    const [backfilling, setBackfilling] = useState(false);
-    const [backfillMessage, setBackfillMessage] = useState(null);
-
-    // Fetch available dates
+    // Fetch available dates and trigger async backfill automatically
     useEffect(() => {
-        fetch(`${API_BASE}/api/historical-dates`)
-            .then(res => apiJson(res))
-            .then(data => {
-                setAvailableDates(data.dates || []);
-                if (data.dates && data.dates.length > 0) {
-                    setDate1(data.dates[data.dates.length - 1]);
-                    if (data.dates.length > 1) {
-                        setDate2(data.dates[data.dates.length - 2]);
-                    }
+        const initializeHistory = async () => {
+            try {
+                const datesResponse = await fetch(`${API_BASE}/api/historical-dates`);
+                const datesData = await apiJson(datesResponse);
+                const initialDates = datesData.dates || [];
+
+                setAvailableDates(initialDates);
+                if (initialDates.length > 0) {
+                    setDate1(initialDates[0]);
+                    setDate2(initialDates[initialDates.length - 1]);
                 }
-            })
-            .catch(err => {
+
+                console.log(`[Backfill] Dates before backfill: ${initialDates.length}`);
+                const backfillResponse = await fetch(`${API_BASE}/api/backfill-historical-data`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const backfillData = await apiJson(backfillResponse);
+                console.log('[Backfill] Started:', backfillData.message || 'Request accepted');
+
+                // Backfill is async on the server; refresh the date list shortly after.
+                setTimeout(async () => {
+                    try {
+                        const refreshedResponse = await fetch(`${API_BASE}/api/historical-dates`);
+                        const refreshedData = await apiJson(refreshedResponse);
+                        const refreshedDates = refreshedData.dates || [];
+                        const addedCount = Math.max(refreshedDates.length - initialDates.length, 0);
+                        console.log(`[Backfill] Dates after refresh: ${refreshedDates.length}`);
+                        console.log(`[Backfill] Added dates: ${addedCount}`);
+
+                        setAvailableDates(refreshedDates);
+                        setDate1((prev) => prev || refreshedDates[0] || '');
+                        setDate2((prev) => prev || refreshedDates[refreshedDates.length - 1] || '');
+                    } catch (refreshErr) {
+                        console.error('[Backfill] Error refreshing dates:', refreshErr);
+                    }
+                }, 7000);
+            } catch (err) {
                 console.error('Error fetching dates:', err);
                 setError(err.message || 'Failed to load historical dates');
-            });
+            }
+        };
+
+        initializeHistory();
     }, []);
 
     // Fetch shelters list from current data
@@ -104,35 +130,6 @@ function ShelterHistory() {
                 setError(err.message || 'Failed to load shelter history');
                 setLoading(false);
             });
-    };
-
-    // Backfill historical data
-    const handleBackfill = async () => {
-        setBackfilling(true);
-        setBackfillMessage(null);
-        setError(null);
-        
-        try {
-            const response = await fetch(`${API_BASE}/api/backfill-historical-data`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            const data = await apiJson(response);
-            setBackfillMessage(data.message || 'Backfill started successfully. Check server logs for progress.');
-            setTimeout(() => {
-                fetch(`${API_BASE}/api/historical-dates`)
-                    .then(res => apiJson(res))
-                    .then(data => setAvailableDates(data.dates || []))
-                    .catch(err => console.error('Error refreshing dates:', err));
-            }, 5000);
-        } catch (error) {
-            console.error('Error starting backfill:', error);
-            setError(error.message || 'Failed to start backfill. Server may be starting—try again in 30–60s.');
-        } finally {
-            setBackfilling(false);
-        }
     };
 
     // Ensure end date never predates start date
@@ -394,28 +391,6 @@ function ShelterHistory() {
                 )}
             </div>
 
-            {/* Backfill Section */}
-            <div className="ShelterHistory-section">
-                <h2>Backfill Historical Data</h2>
-                {availableDates.length === 0 ? (
-                    <p>No historical data available yet. You can backfill historical data from the API.</p>
-                ) : (
-                    <p>Currently have {availableDates.length} dates stored. Backfill will fetch any missing dates from the API.</p>
-                )}
-                <button
-                    onClick={handleBackfill}
-                    disabled={backfilling}
-                    className="ShelterHistory-button"
-                    style={{ marginTop: '15px' }}
-                >
-                    {backfilling ? 'Backfilling...' : '🔄 Backfill Historical Data from API'}
-                </button>
-                {backfillMessage && (
-                    <div className="ShelterHistory-success" style={{ marginTop: '15px', padding: '15px', backgroundColor: '#d1fae5', color: '#065f46', borderRadius: '4px', border: '1px solid #10b981' }}>
-                        {backfillMessage}
-                    </div>
-                )}
-            </div>
         </div>
     );
 }
