@@ -1064,6 +1064,12 @@ text-align: center;
   margin-top: 20px;
 }
 
+.ShelterHistory-chart-canvas {
+  position: relative;
+  height: 420px;
+  width: 100%;
+}
+
 .ShelterHistory-table {
   margin-top: 30px;
   overflow-x: auto;
@@ -1157,6 +1163,10 @@ text-align: center;
   .ShelterHistory-table,
   .ShelterHistory-comparison-table {
     font-size: 12px;
+  }
+
+  .ShelterHistory-chart-canvas {
+    height: 560px;
   }
 }
 
