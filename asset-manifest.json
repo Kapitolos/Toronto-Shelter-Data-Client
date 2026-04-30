@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/Toronto-Shelter-Data-Client/static/css/main.6f032a41.css",
+    "main.css": "/Toronto-Shelter-Data-Client/static/css/main.22b0c141.css",
     "main.js": "/Toronto-Shelter-Data-Client/static/js/main.255b52ed.js",
     "index.html": "/Toronto-Shelter-Data-Client/index.html",
-    "main.6f032a41.css.map": "/Toronto-Shelter-Data-Client/static/css/main.6f032a41.css.map",
+    "main.22b0c141.css.map": "/Toronto-Shelter-Data-Client/static/css/main.22b0c141.css.map",
     "main.255b52ed.js.map": "/Toronto-Shelter-Data-Client/static/js/main.255b52ed.js.map"
   },
   "entrypoints": [
-    "static/css/main.6f032a41.css",
+    "static/css/main.22b0c141.css",
     "static/js/main.255b52ed.js"
   ]
 }
