@@ -41,7 +41,6 @@ function ShelterHistory() {
     const [shelterHistory, setShelterHistory] = useState(null);
     const [date1, setDate1] = useState('');
     const [date2, setDate2] = useState('');
-    const [comparison, setComparison] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [shelters, setShelters] = useState([]);
@@ -112,14 +111,23 @@ function ShelterHistory() {
 
     // Fetch shelter history
     const handleFetchHistory = () => {
-        if (!selectedShelter) {
+        if (!selectedShelter || !date1 || !date2) {
+            setError('Please select a shelter and date range');
+            return;
+        }
+        if (date2 < date1) {
+            setError('End date must be on or after the start date');
+            return;
+        }
+        const shelterParam = selectedShelter === '__all__' ? '__all__' : selectedShelter;
+        if (!shelterParam) {
             setError('Please select a shelter');
             return;
         }
 
         setLoading(true);
         setError(null);
-        fetch(`${API_BASE}/api/shelter-history/${encodeURIComponent(selectedShelter)}`)
+        fetch(`${API_BASE}/api/shelter-history/${encodeURIComponent(shelterParam)}`)
             .then(res => apiJson(res))
             .then(data => {
                 setShelterHistory(data);
@@ -139,36 +147,11 @@ function ShelterHistory() {
         }
     }, [date1, date2]);
 
-    // Compare dates
-    const handleCompareDates = () => {
-        if (!date1 || !date2) {
-            setError('Please select both dates');
-            return;
-        }
-        if (date2 < date1) {
-            setError('End date must be on or after the start date');
-            return;
-        }
-
-        setLoading(true);
-        setError(null);
-        fetch(`${API_BASE}/api/compare-dates?date1=${date1}&date2=${date2}`)
-            .then(res => apiJson(res))
-            .then(data => {
-                setComparison(data);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error('Error comparing dates:', err);
-                setError(err.message || 'Failed to compare dates');
-                setLoading(false);
-            });
-    };
-
-    // Keep only exact shelter matches and only rows inside selected date range
+    // Keep only selected shelter rows (or aggregate all shelters) inside selected date range
     const getFilteredShelterRows = () => {
         if (!shelterHistory || !shelterHistory.history) return [];
 
+        const isAllShelters = selectedShelter === '__all__';
         const shelterName = (selectedShelter || '').trim().toLowerCase();
         const start = date1 || '0000-00-00';
         const end = date2 || '9999-12-31';
@@ -180,6 +163,22 @@ function ShelterHistory() {
 
         return filteredDates.map((date) => {
             const entries = shelterHistory.history[date] || [];
+            if (isAllShelters) {
+                const aggregate = entries.reduce((acc, entry) => {
+                    acc.capacity += Number(entry?.capacity || 0);
+                    acc.occupied += Number(entry?.occupied || 0);
+                    acc.unoccupied += Number(entry?.unoccupied || 0);
+                    return acc;
+                }, { capacity: 0, occupied: 0, unoccupied: 0 });
+
+                return {
+                    date,
+                    capacity: aggregate.capacity,
+                    occupied: aggregate.occupied,
+                    unoccupied: aggregate.unoccupied
+                };
+            }
+
             const exactEntry = entries.find((entry) => (entry.name || '').trim().toLowerCase() === shelterName);
             const shelterData = exactEntry;
             if (!shelterData) {
@@ -260,13 +259,34 @@ function ShelterHistory() {
                         className="ShelterHistory-select"
                     >
                         <option value="">Select a shelter...</option>
+                        <option value="__all__">All Shelters</option>
                         {shelters.map(shelter => (
                             <option key={shelter} value={shelter}>{shelter}</option>
                         ))}
                     </select>
+                    <select
+                        value={date1}
+                        onChange={(e) => setDate1(e.target.value)}
+                        className="ShelterHistory-select"
+                    >
+                        <option value="">Select start date...</option>
+                        {availableDates.map(date => (
+                            <option key={date} value={date}>{date}</option>
+                        ))}
+                    </select>
+                    <select
+                        value={date2}
+                        onChange={(e) => setDate2(e.target.value)}
+                        className="ShelterHistory-select"
+                    >
+                        <option value="">Select end date...</option>
+                        {endDateOptions.map(date => (
+                            <option key={date} value={date}>{date}</option>
+                        ))}
+                    </select>
                     <button
                         onClick={handleFetchHistory}
-                        disabled={!selectedShelter || loading}
+                        disabled={!selectedShelter || !date1 || !date2 || loading}
                         className="ShelterHistory-button"
                     >
                         {loading ? 'Loading...' : 'View History'}
@@ -275,7 +295,7 @@ function ShelterHistory() {
 
                 {shelterHistory && historyChartData && (
                     <div className="ShelterHistory-chart">
-                        <h3>{shelterHistory.shelterName} - Historical Trends</h3>
+                        <h3>{selectedShelter === '__all__' ? 'All Shelters - Historical Trends' : `${shelterHistory.shelterName} - Historical Trends`}</h3>
                         <div className="ShelterHistory-chart-canvas">
                             <Line
                                 data={historyChartData}
@@ -328,90 +348,6 @@ function ShelterHistory() {
                                             </tr>
                                         );
                                     })}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* Date Comparison Section */}
-            <div className="ShelterHistory-section">
-                <h2>Compare Dates (All Shelters)</h2>
-                <p className="ShelterHistory-note">
-                    This comparison aggregates all shelters in the selected range.
-                    Use "View Shelter History" above for one shelter only.
-                </p>
-                <div className="ShelterHistory-controls">
-                    <select
-                        value={date1}
-                        onChange={(e) => setDate1(e.target.value)}
-                        className="ShelterHistory-select"
-                    >
-                        <option value="">Select start date...</option>
-                        {availableDates.map(date => (
-                            <option key={date} value={date}>{date}</option>
-                        ))}
-                    </select>
-                    <select
-                        value={date2}
-                        onChange={(e) => setDate2(e.target.value)}
-                        className="ShelterHistory-select"
-                    >
-                        <option value="">Select end date...</option>
-                        {endDateOptions.map(date => (
-                            <option key={date} value={date}>{date}</option>
-                        ))}
-                    </select>
-                    <button
-                        onClick={handleCompareDates}
-                        disabled={!date1 || !date2 || loading}
-                        className="ShelterHistory-button"
-                    >
-                        {loading ? 'Loading...' : 'Compare All Shelters'}
-                    </button>
-                </div>
-
-                {comparison && (
-                    <div className="ShelterHistory-comparison">
-                        <h3>Comparison: {comparison.date1} vs {comparison.date2}</h3>
-                        <div className="ShelterHistory-comparison-table">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Shelter</th>
-                                        <th>{comparison.date1}</th>
-                                        <th>{comparison.date2}</th>
-                                        <th>Change</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {comparison.comparisons.map((comp, idx) => (
-                                        <tr key={idx}>
-                                            <td>{comp.shelter}</td>
-                                            <td>
-                                                Cap: {comp.date1.capacity}<br/>
-                                                Occ: {comp.date1.occupied}<br/>
-                                                Avail: {comp.date1.unoccupied}
-                                            </td>
-                                            <td>
-                                                Cap: {comp.date2.capacity}<br/>
-                                                Occ: {comp.date2.occupied}<br/>
-                                                Avail: {comp.date2.unoccupied}
-                                            </td>
-                                            <td>
-                                                Cap: <span className={comp.changes.capacityChange >= 0 ? 'positive' : 'negative'}>
-                                                    {comp.changes.capacityChange >= 0 ? '+' : ''}{comp.changes.capacityChange}
-                                                </span><br/>
-                                                Occ: <span className={comp.changes.occupiedChange >= 0 ? 'positive' : 'negative'}>
-                                                    {comp.changes.occupiedChange >= 0 ? '+' : ''}{comp.changes.occupiedChange}
-                                                </span><br/>
-                                                Avail: <span className={comp.changes.unoccupiedChange >= 0 ? 'positive' : 'negative'}>
-                                                    {comp.changes.unoccupiedChange >= 0 ? '+' : ''}{comp.changes.unoccupiedChange}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))}
                                 </tbody>
                             </table>
                         </div>
