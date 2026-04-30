@@ -1171,6 +1171,19 @@ text-align: center;
     font-size: 12px;
   }
 
+  .ShelterHistory-table table {
+    width: 100%;
+    table-layout: fixed;
+    font-size: 11px;
+  }
+
+  .ShelterHistory-table th,
+  .ShelterHistory-table td {
+    padding: 6px 5px;
+    font-size: 11px;
+    word-break: break-word;
+  }
+
   .ShelterHistory-chart-canvas {
     height: 680px;
   }
